@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Apps Playground</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: #0f1117; color: #e1e4e8; min-height: 100vh;
+  }
+  .app-header {
+    background: linear-gradient(135deg, #1a1d27 0%, #232837 100%);
+    border-bottom: 1px solid #2d3347; padding: 1.5rem 2rem;
+  }
+  .app-header h1 {
+    font-size: 1.5rem; font-weight: 600; color: #f0f4f8;
+  }
+  .app-header p {
+    font-size: 0.9rem; color: #8b949e; margin-top: 0.25rem;
+  }
+  .app-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem; padding: 1.5rem 2rem;
+  }
+  .app-card {
+    background: #1a1d27; border: 1px solid #2d3347; border-radius: 8px;
+    overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+  }
+  .app-card:hover {
+    border-color: #58a6ff; transform: translateY(-2px);
+  }
+  .app-card-header {
+    padding: 1rem 1.25rem 0.5rem;
+  }
+  .app-card-header h2 {
+    font-size: 1.1rem; font-weight: 500; color: #f0f4f8;
+  }
+  .app-card-header .tool-name {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem;
+    color: #58a6ff; margin-top: 0.15rem;
+  }
+  .app-card-body {
+    padding: 0 1.25rem 1rem; max-height: 300px; overflow: hidden;
+  }
+  .app-card-body iframe {
+    width: 100%; height: 280px; border: none; border-radius: 6px;
+    background: #fff;
+  }
+  .app-card-actions {
+    padding: 0.75rem 1.25rem; border-top: 1px solid #2d3347;
+    display: flex; gap: 0.5rem; align-items: center;
+  }
+  .app-card-actions a {
+    display: inline-block; padding: 0.4rem 0.9rem;
+    background: #238636; color: #fff; border-radius: 6px;
+    text-decoration: none; font-size: 0.85rem; font-weight: 500;
+    transition: background 0.2s;
+  }
+  .app-card-actions a:hover { background: #2ea043; }
+  .status-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1a1d27; border-top: 1px solid #2d3347;
+    padding: 0.6rem 2rem; font-size: 0.8rem; color: #8b949e;
+    display: flex; justify-content: space-between;
+  }
+  .status-bar .conn-status { color: #3fb950; }
+  .status-bar .conn-status.disconnected { color: #f85149; }
+  .empty-state {
+    grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;
+    color: #8b949e;
+  }
+  .empty-state h2 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #e1e4e8; }
+  .empty-state p { max-width: 500px; margin: 0 auto; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <h1>🧩 MCP Apps Playground</h1>
+  <p>{{ num_apps }} MCP App{{ 's' if num_apps != 1 else '' }} discovered</p>
+</header>
+
+<main class="app-grid">
+{% if apps %}
+{% for app in apps %}
+  <article class="app-card">
+    <div class="app-card-header">
+      <h2>{{ app.name }}</h2>
+      <div class="tool-name">{{ app.tool_name }}</div>
+    </div>
+    <div class="app-card-body">
+      <iframe
+        src="/mcp-apps/{{ app.tool_name }}/"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        loading="lazy"
+        title="{{ app.name }}"
+      ></iframe>
+    </div>
+    <div class="app-card-actions">
+      <a href="/mcp-apps/{{ app.tool_name }}/" target="_blank">Open Full Screen</a>
+    </div>
+  </article>
+{% endfor %}
+{% else %}
+  <div class="empty-state">
+    <h2>No MCP Apps Found</h2>
+    <p>
+      Connect to an MCP server that advertises tools with
+      <code>_meta.ui.resourceUri</code> metadata to preview them here.
+    </p>
+  </div>
+{% endif %}
+</main>
+
+<footer class="status-bar">
+  <span class="conn-status {{ 'disconnected' if not connected else '' }}">
+    {{ '● Connected' if connected else '○ Disconnected' }}
+  </span>
+  <span>Port {{ port }} · mcp-app-playground v{{ version }}</span>
+</footer>
+</body>
+</html>

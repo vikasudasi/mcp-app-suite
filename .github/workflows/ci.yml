@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: make install-all
+        run: pip install -e '.[all]'
 
       - name: Ruff
         run: make lint
@@ -32,5 +32,8 @@ jobs:
       - name: mypy
         run: make typecheck
 
-      - name: pytest with coverage
-        run: make test
+      - name: Unit tests with coverage
+        run: pytest -m 'not integration' --cov=mcp_app_suite_shared --cov=mcp_app_playground --cov=mcp_app_scaffolder --cov=examples --cov-report=term-missing
+
+      - name: Integration tests
+        run: pytest -m integration

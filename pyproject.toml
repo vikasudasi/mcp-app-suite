@@ -49,6 +49,9 @@ packages = [
     "examples",
 ]
 
+[tool.setuptools.package-data]
+mcp_app_scaffolder = ["templates/**/*.j2"]
+
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers"
 testpaths = ["tests"]

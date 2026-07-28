@@ -1,0 +1,52 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("{{ app_slug }}")
+ROOT = Path(__file__).parent
+
+TOOL_META = {
+    "ui": {
+        "resourceUri": "ui://app/index.html",
+        "label": "{{ app_display_name }}",
+    }
+}
+
+{% if demo %}
+state = {"count": 0}
+
+
+@mcp.tool(
+    name="{{ tool_name }}",
+    description="Counter tool with increment/decrement operations.",
+    _meta=TOOL_META,
+)
+def counter(action: str = "get") -> dict[str, int]:
+    if action == "increment":
+        state["count"] += 1
+    elif action == "decrement":
+        state["count"] -= 1
+    return {"count": state["count"]}
+{% else %}
+@mcp.tool(
+    name="{{ tool_name }}",
+    description="Simple hello tool for {{ app_display_name }}.",
+    _meta=TOOL_META,
+)
+def hello(name: str = "world") -> dict[str, str]:
+    return {"message": f"Hello, {name}!"}
+{% endif %}
+
+
+@mcp.resource("ui://app/index.html")
+def app_resource() -> str:
+    built = ROOT / "ui" / "dist" / "index.html"
+    dev = ROOT / "ui" / "index.html"
+    source = built if built.exists() else dev
+    return source.read_text(encoding="utf-8")
+
+
+if __name__ == "__main__":
+    mcp.run()

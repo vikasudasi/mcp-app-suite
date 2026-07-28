@@ -1,0 +1,47 @@
+import { App } from "@modelcontextprotocol/ext-apps";
+import "./style.css";
+
+const root = document.querySelector("#app");
+const app = new App();
+
+window.addEventListener("message", (event) => {
+  app.handleMessage(event);
+});
+
+window.parent.postMessage({ type: "ready", source: "{{ app_slug }}" }, "*");
+
+{% if demo %}
+let count = 0;
+
+root.innerHTML = `
+  <main>
+    <h1>{{ app_display_name }}</h1>
+    <p>Count: <strong id="count">0</strong></p>
+    <div class="buttons">
+      <button id="dec">-1</button>
+      <button id="inc">+1</button>
+    </div>
+  </main>
+`;
+
+const countEl = document.querySelector("#count");
+const incBtn = document.querySelector("#inc");
+const decBtn = document.querySelector("#dec");
+
+async function apply(action) {
+  const result = await app.callTool("{{ tool_name }}", { action });
+  const payload = typeof result === "string" ? JSON.parse(result) : result;
+  count = payload?.count ?? count;
+  countEl.textContent = String(count);
+}
+
+incBtn.addEventListener("click", () => apply("increment"));
+decBtn.addEventListener("click", () => apply("decrement"));
+{% else %}
+root.innerHTML = `
+  <main>
+    <h1>{{ app_display_name }}</h1>
+    <p>Scaffold generated. Wire this UI to your MCP tools.</p>
+  </main>
+`;
+{% endif %}

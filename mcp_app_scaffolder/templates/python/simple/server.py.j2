@@ -1,0 +1,88 @@
+from __future__ import annotations
+
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("{{ app_slug }}")
+
+TOOL_META = {
+    "ui": {
+        "resourceUri": "ui://app/index.html",
+        "label": "{{ app_display_name }}",
+    }
+}
+
+{% if demo %}
+state = {"count": 0}
+
+
+@mcp.tool(
+    name="{{ tool_name }}",
+    description="Counter tool with increment/decrement operations.",
+    _meta=TOOL_META,
+)
+def counter(action: str = "get") -> dict[str, int]:
+    if action == "increment":
+        state["count"] += 1
+    elif action == "decrement":
+        state["count"] -= 1
+    return {"count": state["count"]}
+{% else %}
+@mcp.tool(
+    name="{{ tool_name }}",
+    description="Simple hello tool for {{ app_display_name }}.",
+    _meta=TOOL_META,
+)
+def hello(name: str = "world") -> dict[str, str]:
+    return {"message": f"Hello, {name}!"}
+{% endif %}
+
+
+@mcp.resource("ui://app/index.html")
+def app_resource() -> str:
+    return """<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ app_display_name }}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; }
+      button { margin-right: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>{{ app_display_name }}</h1>
+    {% if demo %}
+    <p>Count: <strong id="count">0</strong></p>
+    <button id="dec">-1</button>
+    <button id="inc">+1</button>
+    {% else %}
+    <p>Scaffold generated. Call your tool from this HTML app.</p>
+    {% endif %}
+    <script type="module">
+      import { App } from "@modelcontextprotocol/ext-apps";
+
+      const app = new App();
+      window.addEventListener("message", (event) => app.handleMessage(event));
+      window.parent.postMessage({ type: "ready", source: "{{ app_slug }}" }, "*");
+
+      {% if demo %}
+      const countEl = document.querySelector("#count");
+      const incBtn = document.querySelector("#inc");
+      const decBtn = document.querySelector("#dec");
+
+      async function apply(action) {
+        const result = await app.callTool("{{ tool_name }}", { action });
+        countEl.textContent = String(result?.count ?? 0);
+      }
+
+      incBtn.addEventListener("click", () => apply("increment"));
+      decBtn.addEventListener("click", () => apply("decrement"));
+      {% endif %}
+    </script>
+  </body>
+</html>"""
+
+
+if __name__ == "__main__":
+    mcp.run()

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ app_slug }}"
+version = "0.1.0"
+description = "MCP App scaffold for {{ app_display_name }}"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp>=1.0.0",
+]

@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-app-suite"
+version = "0.1.0"
+description = "Monorepo for MCP App tooling, scaffolding, and examples."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Vik Udasi" }]
+dependencies = []
+
+[project.optional-dependencies]
+playground = [
+    "aiohttp>=3.10.0",
+    "typer>=0.12.3",
+]
+scaffolder = [
+    "jinja2>=3.1.4",
+    "typer>=0.12.3",
+]
+examples = [
+    "mcp>=1.0.0",
+    "typer>=0.12.3",
+]
+all = [
+    "aiohttp>=3.10.0",
+    "jinja2>=3.1.4",
+    "mcp>=1.0.0",
+    "typer>=0.12.3",
+]
+
+[project.scripts]
+mcp-app-playground = "mcp_app_playground.cli:main"
+mcp-app-scaffolder = "mcp_app_scaffolder.cli:main"
+mcp-app-examples = "examples.cli:main"
+
+[tool.setuptools]
+packages = [
+    "mcp_app_suite_shared",
+    "mcp_app_playground",
+    "mcp_app_scaffolder",
+    "examples",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+check_untyped_defs = true
